@@ -56,6 +56,12 @@ jobs:
           cd $GITHUB_WORKSPACE/examples/test-studio
           sanity build -y
 
+      - name: Depcheck
+        run: |
+          # Check for unused dependencies
+          cd $GITHUB_WORKSPACE
+          npm run depcheck
+
       - name: Test sanity init command
         run: |
           # Test initializing a project in unattended mode
