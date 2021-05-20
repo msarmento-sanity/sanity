@@ -9,9 +9,15 @@ const chalk = require('chalk')
 const cwd = path.resolve(process.cwd(), process.argv[2] || '.')
 
 const options = {
-  ignoreMatches: ['@types/jest', 'typescript-plugin-css-modules', 'ts-node', 'config:@sanity'],
+  ignoreMatches: [
+    '@types/jest',
+    'typescript-plugin-css-modules',
+    'ts-node',
+    'config:sanity',
+    'part:@sanity',
+    'sanity:*',
+  ],
   ignoreDirs: ['lib'],
-  skipMissing: true,
   detectors: [
     depcheck.detector.exportDeclaration,
     depcheck.detector.extract,
@@ -30,6 +36,7 @@ const options = {
     depcheck.special.webpack,
     depcheck.special.jest,
     sanityJSONParser,
+    partsParser,
     implicitDepsParser,
     depcheckIgnoreParser,
   ],
@@ -59,8 +66,8 @@ depcheck(cwd, options).then((unused) => {
         chalk.bold('Missing dependencies'),
         ...missing.flatMap((dep) => [
           `- ${dep.name}`,
-          ' used by',
-          ...dep.usages.map((u) => `  -- ${u}`),
+          '  used by',
+          ...dep.usages.map((u) => `    -- ${path.relative(cwd, u)}`),
         ]),
       ].join('\n')
     )
@@ -105,7 +112,11 @@ function partsDetector(node) {
 const resolveResult = tryResolve(cwd)
 
 function getProvidedPackage(partId) {
-  return resolveResult?.implementations[partId].map((im) => im.plugin) || []
+  return (
+    resolveResult?.implementations[partId]
+      .map((im) => im.plugin)
+      .filter((p) => p !== '(project root)') || []
+  )
 }
 
 function sanityJSONParser(filePath, deps, dir) {
@@ -115,6 +126,15 @@ function sanityJSONParser(filePath, deps, dir) {
     return deps.filter((dep) =>
       sanityConfig.plugins.some((plugin) => plugin === dep || dep === `sanity-plugin-${plugin}`)
     )
+  }
+  return []
+}
+
+function partsParser(filePath, deps, dir) {
+  const filename = path.basename(filePath)
+  if (filename === 'sanity.json') {
+    const implementations = resolveResult?.implementations
+    return Object.keys(implementations).map((key) => implementations[key].map((impl) => impl.path))
   }
   return []
 }
