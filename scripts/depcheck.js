@@ -8,14 +8,24 @@ const chalk = require('chalk')
 
 const cwd = path.resolve(process.cwd(), process.argv[2] || '.')
 
+const MONOREPO_ROOT = process.env.LERNA_ROOT_PATH
+
+// eslint-disable-next-line import/no-dynamic-require
+const rootPkg = require(`${MONOREPO_ROOT}/package.json`)
+// eslint-disable-next-line import/no-dynamic-require
+const package = require(`${cwd}/package.json`)
+const {pick} = require('lodash')
+
 const options = {
   ignoreMatches: [
     '@types/jest',
     'typescript-plugin-css-modules',
     'ts-node',
-    'config:sanity',
-    'part:@sanity',
+    'config:*',
+    'part:*',
+    'all:part:*',
     'sanity:*',
+    ...getProjectIgnores(cwd),
   ],
   ignoreDirs: ['lib'],
   detectors: [
@@ -31,15 +41,20 @@ const options = {
   ],
   specials: [
     depcheck.special.bin,
-    depcheck.special.eslint,
     depcheck.special.babel,
     depcheck.special.webpack,
     depcheck.special.jest,
+    eslint,
     sanityJSONParser,
     partsParser,
     implicitDepsParser,
-    depcheckIgnoreParser,
   ],
+  package,
+}
+
+async function eslint(filePath, deps, dir) {
+  const detected = await depcheck.special.eslint(filePath, deps, dir)
+  return detected.filter((res) => deps.includes(res) || !rootPkg.devDependencies[res])
 }
 
 depcheck(cwd, options).then((unused) => {
@@ -95,12 +110,12 @@ function implicitDepsParser(filePath, deps) {
   return deps.flatMap((dep) => IMPLICIT_DEPS[dep] || [])
 }
 
-function depcheckIgnoreParser(filePath, deps) {
-  const filename = path.basename(filePath)
-  if (filename === '.depcheckignore.json') {
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8')).ignore
+function getProjectIgnores(baseDir) {
+  try {
+    return JSON.parse(fs.readFileSync(`${baseDir}/.depcheckignore.json`, 'utf-8'))?.ignore || []
+  } catch {
+    return []
   }
-  return []
 }
 
 function partsDetector(node) {
