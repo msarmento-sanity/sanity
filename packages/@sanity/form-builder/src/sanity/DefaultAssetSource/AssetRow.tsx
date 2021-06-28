@@ -1,7 +1,7 @@
 import type {Subscription} from 'rxjs'
 import React, {useRef, useState} from 'react'
 import styled from 'styled-components'
-import {Button, Card, Flex, Stack, Label, Text, Grid} from '@sanity/ui'
+import {Button, Box, Card, Flex, Stack, Label, Text, Tooltip, Grid} from '@sanity/ui'
 import {DocumentIcon, ChevronUpIcon, ChevronDownIcon, LinkIcon, TrashIcon} from '@sanity/icons'
 import {useTimeAgo} from '@sanity/base/hooks'
 import prettyBytes from 'pretty-bytes'
@@ -46,6 +46,7 @@ const AssetRow = (props: RowProps) => {
   const formattedTime = useTimeAgo(_createdAt, {agoSuffix: true})
   const formattedMimeType = formatMimeType(mimeType)
   const formattedSize = prettyBytes(size)
+  const showTooltip = (originalFilename || '').length > 37
 
   const handleDeleteAsset = () => {
     setIsDeleting(true)
@@ -211,9 +212,29 @@ const AssetRow = (props: RowProps) => {
               <DocumentIcon />
             </Text>
           </Card>
-          <Text size={1} align="left" textOverflow="ellipsis" style={STYLES_BUTTON_TEXT}>
-            {originalFilename}
-          </Text>
+          {showTooltip && (
+            <Tooltip
+              content={
+                <Box padding={2}>
+                  <Text muted size={1}>
+                    {originalFilename}
+                  </Text>
+                </Box>
+              }
+              fallbackPlacements={['right', 'left']}
+              placement="top"
+              portal
+            >
+              <Text size={1} align="left" textOverflow="ellipsis" style={STYLES_BUTTON_TEXT}>
+                {originalFilename}
+              </Text>
+            </Tooltip>
+          )}
+          {!showTooltip && (
+            <Text size={1} align="left" textOverflow="ellipsis" style={STYLES_BUTTON_TEXT}>
+              {originalFilename}
+            </Text>
+          )}
         </Flex>
         <Flex align="center">
           <Text size={1} muted>
@@ -232,6 +253,7 @@ const AssetRow = (props: RowProps) => {
         </Flex>
         <Flex justify="flex-end" align="center">
           <AssetMenu
+            border={false}
             disabledDeleteTitle={DISABLED_DELETE_TITLE}
             isSelected={isSelected}
             onAction={handleMenuAction}

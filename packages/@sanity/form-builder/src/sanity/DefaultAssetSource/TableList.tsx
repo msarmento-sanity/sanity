@@ -13,6 +13,8 @@ interface Props {
   selectedAssets: AssetRecord[]
 }
 
+const STYLES_FILENAME = {paddingLeft: '2.2rem'}
+
 export default function TableList(props: Props) {
   const isMobile = useMatchesMedia(1)
   const {assets, onClick, onKeyPress, onDeleteFinished, selectedAssets, isLoading} = props
@@ -34,11 +36,12 @@ export default function TableList(props: Props) {
           </Grid>
         ) : (
           <Grid
+            gap={1}
             style={{
               gridTemplateColumns: '3fr 1fr 1fr 2fr 30px',
             }}
           >
-            <Box flex={2} paddingLeft={3}>
+            <Box flex={2} style={STYLES_FILENAME}>
               <Label muted size={1}>
                 Filename
               </Label>
