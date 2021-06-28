@@ -5,9 +5,11 @@ import {AssetMenuAction} from './types'
 
 export function AssetMenu({
   isSelected,
+  disabledDeleteTitle = 'Cannot delete current image',
   onAction,
 }: {
   isSelected: boolean
+  disabledDeleteTitle?: string
   onAction: (action: AssetMenuAction) => void
 }) {
   return (
@@ -29,7 +31,7 @@ export function AssetMenu({
             icon={TrashIcon}
             tone={isSelected ? undefined : 'critical'}
             disabled={isSelected}
-            title={isSelected ? 'Cannot delete current image' : undefined}
+            title={isSelected ? disabledDeleteTitle : undefined}
             onClick={() => {
               onAction({type: 'delete'})
             }}
