@@ -14,11 +14,44 @@ import {AssetMenuAction} from './types'
 import {DeleteAssetErrorDialog} from './DeleteAssetErrorDialog'
 import {formatMimeType} from './utils/mimeType'
 
+const CardIconWrapper = styled.span`
+  flex-shrink: 0;
+`
+
 const RowButton = styled.button`
-  border: 0;
-  background: none;
-  appearance: none;
+  box-shadow: none;
+  min-width: 0;
   cursor: pointer;
+  position: initial;
+
+  &:before,
+  &:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+  }
+
+  &:before {
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  &:hover:before {
+    background-color: var(--card-bg-color);
+  }
+
+  &:hover-within:before {
+    background-color: var(--card-bg-color);
+  }
+
+  &:hover ${CardIconWrapper} {
+    --card-bg-color: var(--card-bg-color);
+    --card-muted-fg-color: var(--card-muted-fg-color);
+  }
 `
 
 interface RowProps {
@@ -33,6 +66,7 @@ interface RowProps {
 const STYLES_ROW_CARD = {position: 'relative' as any}
 const STYLES_ICON_CARD = {flexShrink: 0}
 const STYLES_BUTTON_TEXT = {minWidth: 0}
+const STYLES_ASSETMENU_WRAPPER = {zIndex: 3}
 const DISABLED_DELETE_TITLE = 'Cannot delete current file'
 
 const AssetRow = (props: RowProps) => {
@@ -95,21 +129,24 @@ const AssetRow = (props: RowProps) => {
           columns={4}
           gap={1}
           style={{
+            position: 'relative',
             gridTemplateColumns: '1fr 30px',
             opacity: isDeleting ? 0.5 : 1,
           }}
         >
-          <Flex as={RowButton} gap={2} flex={2} align="center" data-id={_id} onClick={onClick}>
-            <Card padding={2} tone="transparent" radius={2}>
-              <Text muted size={2} style={STYLES_ICON_CARD}>
-                <DocumentIcon />
+          <Button as={RowButton} mode="bleed" padding={0} data-id={_id} onClick={onClick}>
+            <Flex gap={2} flex={2} align="center">
+              <Card as={CardIconWrapper} padding={2} tone="transparent" radius={2}>
+                <Text muted size={2} style={STYLES_ICON_CARD}>
+                  <DocumentIcon />
+                </Text>
+              </Card>
+              <Text size={1} align="left" textOverflow="ellipsis" style={STYLES_BUTTON_TEXT}>
+                {originalFilename}
               </Text>
-            </Card>
-            <Text size={1} align="left" textOverflow="ellipsis" style={STYLES_BUTTON_TEXT}>
-              {originalFilename}
-            </Text>
-          </Flex>
-          <Flex justify="flex-end" align="center">
+            </Flex>
+          </Button>
+          <Flex justify="flex-end" align="center" style={STYLES_ASSETMENU_WRAPPER}>
             <Button
               mode="bleed"
               fontSize={1}
@@ -152,7 +189,7 @@ const AssetRow = (props: RowProps) => {
                 fontSize={1}
                 tone="default"
                 mode="ghost"
-                text="Show documents using this"
+                text="Find usages"
                 onClick={handleToggleUsageDialog}
                 icon={LinkIcon}
               />
@@ -160,10 +197,10 @@ const AssetRow = (props: RowProps) => {
                 fontSize={1}
                 tone="critical"
                 mode="ghost"
-                text="Delete asset"
+                text="Delete"
                 icon={TrashIcon}
                 disabled={isSelected}
-                title={isSelected ? DISABLED_DELETE_TITLE : undefined}
+                title={isSelected ? DISABLED_DELETE_TITLE : 'Delete file'}
                 onClick={handleDeleteAsset}
               />
             </Stack>
@@ -192,50 +229,66 @@ const AssetRow = (props: RowProps) => {
         gap={1}
         data-id={_id}
         style={{
+          position: 'relative',
           gridTemplateColumns: '3fr 1fr 1fr 2fr 30px',
           opacity: isDeleting ? 0.5 : 1,
         }}
       >
-        <Flex
+        <Button
           as={RowButton}
-          gap={2}
-          flex={2}
-          paddingRight={1}
-          align="center"
-          onClick={onClick}
-          onKeyPress={onKeyPress}
+          mode="bleed"
           data-id={_id}
+          onClick={onClick}
+          padding={0}
+          onKeyPress={onKeyPress}
           title={`Select the file ${originalFilename}`}
         >
-          <Card padding={2} tone="transparent" radius={2} style={STYLES_ICON_CARD}>
-            <Text muted size={2}>
-              <DocumentIcon />
-            </Text>
-          </Card>
-          {showTooltip && (
-            <Tooltip
-              content={
-                <Box padding={2}>
-                  <Text muted size={1}>
-                    {originalFilename}
-                  </Text>
-                </Box>
-              }
-              fallbackPlacements={['right', 'left']}
-              placement="top"
-              portal
+          <Flex
+            gap={2}
+            flex={2}
+            paddingRight={1}
+            align="center"
+            onClick={onClick}
+            onKeyPress={onKeyPress}
+            data-id={_id}
+            title={`Select the file ${originalFilename}`}
+          >
+            <Card
+              as={CardIconWrapper}
+              padding={2}
+              tone="transparent"
+              radius={2}
+              style={STYLES_ICON_CARD}
             >
+              <Text muted size={2}>
+                <DocumentIcon />
+              </Text>
+            </Card>
+            {showTooltip && (
+              <Tooltip
+                content={
+                  <Box padding={2}>
+                    <Text muted size={1}>
+                      {originalFilename}
+                    </Text>
+                  </Box>
+                }
+                fallbackPlacements={['right', 'left']}
+                placement="top"
+                portal
+              >
+                <Text size={1} align="left" textOverflow="ellipsis" style={STYLES_BUTTON_TEXT}>
+                  {originalFilename}
+                </Text>
+              </Tooltip>
+            )}
+            {!showTooltip && (
               <Text size={1} align="left" textOverflow="ellipsis" style={STYLES_BUTTON_TEXT}>
                 {originalFilename}
               </Text>
-            </Tooltip>
-          )}
-          {!showTooltip && (
-            <Text size={1} align="left" textOverflow="ellipsis" style={STYLES_BUTTON_TEXT}>
-              {originalFilename}
-            </Text>
-          )}
-        </Flex>
+            )}
+          </Flex>
+        </Button>
         <Flex align="center">
           <Text size={1} muted>
             {formattedSize}
@@ -251,7 +304,7 @@ const AssetRow = (props: RowProps) => {
             {formattedTime}
           </Text>
         </Flex>
-        <Flex justify="flex-end" align="center">
+        <Flex justify="flex-end" align="center" style={STYLES_ASSETMENU_WRAPPER}>
           <AssetMenu
             border={false}
             disabledDeleteTitle={DISABLED_DELETE_TITLE}
