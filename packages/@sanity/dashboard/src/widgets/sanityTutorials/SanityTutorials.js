@@ -1,8 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {get} from 'lodash'
+import {Card, Box, Heading, Flex, Stack} from '@sanity/ui'
 import Tutorial from './Tutorial'
-import styles from './SanityTutorials.css'
 import dataAdapter from './dataAdapter'
 
 const {urlBuilder, getFeed} = dataAdapter
@@ -49,35 +49,49 @@ class SanityTutorials extends React.Component {
     const title = 'Learn about Sanity'
 
     return (
-      <div className={styles.root}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>{title}</h1>
-        </header>
-        <ul className={styles.grid}>
-          {feedItems.map((feedItem) => {
-            if (!feedItem.title || (!feedItem.guideOrTutorial && !feedItem.externalLink)) {
-              return null
-            }
-            const presenter = feedItem.presenter || get(feedItem, 'guideOrTutorial.presenter') || {}
-            const subtitle = get(feedItem, 'category')
-            const {guideOrTutorial = {}} = feedItem
-            return (
-              <li key={feedItem._id}>
-                <Tutorial
-                  title={feedItem.title}
-                  href={
-                    createUrl(guideOrTutorial.slug, guideOrTutorial._type) || feedItem.externalLink
-                  }
-                  presenterName={presenter.name}
-                  presenterSubtitle={subtitle}
-                  showPlayIcon={feedItem.hasVideo}
-                  posterURL={urlBuilder.image(feedItem.poster).height(360).url()}
-                />
-              </li>
-            )
-          })}
-        </ul>
-      </div>
+      <Card radius={3} paddingY={4}>
+        <Stack space={4}>
+          <Box as="header" paddingX={4}>
+            <Heading as="h1" size={1}>
+              {title}
+            </Heading>
+          </Box>
+          <Flex as="ul" overflow="auto" align="stretch">
+            {feedItems?.map((feedItem, index) => {
+              if (!feedItem.title || (!feedItem.guideOrTutorial && !feedItem.externalLink)) {
+                return null
+              }
+              const presenter =
+                feedItem.presenter || get(feedItem, 'guideOrTutorial.presenter') || {}
+              const subtitle = get(feedItem, 'category')
+              const {guideOrTutorial = {}} = feedItem
+              return (
+                <Flex
+                  as="li"
+                  key={feedItem._id}
+                  paddingRight={index < feedItems?.length - 1 ? 1 : 3}
+                  paddingLeft={index === 0 && 3}
+                  align="stretch"
+                  flex="0 0 27.5%"
+                  style={{minWidth: 272, width: '30%'}}
+                >
+                  <Tutorial
+                    title={feedItem.title}
+                    href={
+                      createUrl(guideOrTutorial.slug, guideOrTutorial._type) ||
+                      feedItem.externalLink
+                    }
+                    presenterName={presenter.name}
+                    presenterSubtitle={subtitle}
+                    showPlayIcon={feedItem.hasVideo}
+                    posterURL={urlBuilder.image(feedItem.poster).height(360).url()}
+                  />
+                </Flex>
+              )
+            })}
+          </Flex>
+        </Stack>
+      </Card>
     )
   }
 }
