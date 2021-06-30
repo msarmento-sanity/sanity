@@ -39,6 +39,15 @@ const DEFAULT_MEDIA_DIMENSIONS: MediaDimensions = {
 
 class DefaultPreview extends React.PureComponent<DefaultPreviewProps> {
   // eslint-disable-next-line complexity
+
+  // eslint-disable-next-line class-methods-use-this
+  componentDidMount() {
+    // eslint-disable-next-line no-console
+    console.warn(
+      'DefaultPreview from `part:@sanity/components/previews/default` is deprecated. Please import from `@sanity/base/components` instead'
+    )
+  }
+
   render() {
     const {
       title = 'Untitled',
