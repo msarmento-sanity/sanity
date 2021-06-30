@@ -1,7 +1,7 @@
 import React from 'react'
 import {map, switchMap} from 'rxjs/operators'
 import Spinner from 'part:@sanity/components/loading/spinner'
-import DefaultPreview from 'part:@sanity/components/previews/default'
+import {DefaultPreview} from '@sanity/base/components'
 import {List, Item} from 'part:@sanity/components/lists/default'
 import AnchorButton from 'part:@sanity/components/buttons/anchor'
 import RobotIcon from 'part:@sanity/base/robot-icon'
