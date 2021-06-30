@@ -28,7 +28,10 @@ export const FromTo = forwardRef<HTMLDivElement, FromToProps>(
       [layout, style]
     )
 
-    const columnStyles = useMemo(() => (layout === 'inline' ? {flexShrink: 0} : {}), [layout])
+    const columnStyles = useMemo(
+      () => (layout === 'inline' ? {flexShrink: 0} : {alignItems: 'stretch'}),
+      [layout]
+    )
 
     return (
       <Layout {...restProps} ref={ref} style={layoutStyles} data-from-to-layout>

@@ -1,5 +1,6 @@
 import {Image} from '@sanity/types'
 import * as React from 'react'
+import {Box, Card, Text} from '@sanity/ui'
 import {
   DiffCard,
   DiffComponent,
@@ -10,7 +11,6 @@ import {
 } from '../../../diff'
 import {FromTo} from '../../../diff/components'
 import {ImagePreview, NoImagePreview} from './ImagePreview'
-import styles from './ImageFieldDiff.css'
 
 const IMAGE_META_FIELDS = ['crop', 'hotspot']
 const BASE_IMAGE_FIELDS = ['asset', ...IMAGE_META_FIELDS]
@@ -46,9 +46,16 @@ export const ImageFieldDiff: DiffComponent<ObjectDiff<Image>> = ({diff, schemaTy
   const showImageDiff = didAssetChange || didMetaChange
   const showMetaChange = didMetaChange && !didAssetChange
 
+  const cardStyles = React.useMemo(
+    () => ({
+      flex: 1,
+    }),
+    []
+  )
+
   const from =
     fromValue && fromRef ? (
-      <DiffCard className={styles.annotation} annotation={assetAnnotation}>
+      <DiffCard annotation={assetAnnotation} style={cardStyles}>
         <ImagePreview
           is="from"
           id={fromRef}
@@ -64,7 +71,7 @@ export const ImageFieldDiff: DiffComponent<ObjectDiff<Image>> = ({diff, schemaTy
 
   const to =
     toValue && toRef ? (
-      <DiffCard className={styles.annotation} annotation={assetAnnotation}>
+      <DiffCard annotation={assetAnnotation} style={cardStyles}>
         <ImagePreview
           is="to"
           id={toRef}
@@ -79,17 +86,17 @@ export const ImageFieldDiff: DiffComponent<ObjectDiff<Image>> = ({diff, schemaTy
 
   if (!from && !to) {
     return (
-      <div className={styles.root}>
-        <div className={styles.emptyMessage}>
-          <span>Image not set</span>
-        </div>
-      </div>
+      <Card padding={4} radius={2} tone="transparent">
+        <Text muted size={1} align="center">
+          Image not set
+        </Text>
+      </Card>
     )
   }
 
   if (!isChanged) {
     return toRef ? (
-      <DiffCard className={styles.annotation} annotation={assetAnnotation}>
+      <DiffCard annotation={assetAnnotation} style={cardStyles}>
         <ImagePreview id={toRef} is="to" diff={diff} />
       </DiffCard>
     ) : null
@@ -98,7 +105,7 @@ export const ImageFieldDiff: DiffComponent<ObjectDiff<Image>> = ({diff, schemaTy
   const imageDiff = <FromTo align="center" from={from} layout="grid" to={to} />
 
   return (
-    <div className={styles.root}>
+    <>
       {showImageDiff &&
         (didAssetChange ? (
           <DiffTooltip
@@ -110,12 +117,11 @@ export const ImageFieldDiff: DiffComponent<ObjectDiff<Image>> = ({diff, schemaTy
         ) : (
           imageDiff
         ))}
-
       {nestedFields.length > 0 && (
-        <div className={styles.nestedFields}>
+        <Box marginTop={3}>
           <ChangeList diff={diff} schemaType={schemaType} fields={nestedFields} />
-        </div>
+        </Box>
       )}
-    </div>
+    </>
   )
 }
